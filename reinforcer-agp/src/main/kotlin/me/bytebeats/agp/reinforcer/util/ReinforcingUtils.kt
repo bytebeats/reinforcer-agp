@@ -47,11 +47,11 @@ fun encryptDex(apkFilePath: String, unzipDirPath: String) {
     //只要dex文件拿出来加密
     val dexFiles = unzipDir.listFiles { _, name -> name.endsWith(".dex") }
     //AES加密
-    for (dexFile in dexFiles) {
+    for (dexFile in dexFiles!!) {
         val bytes = getByteFromFile(dexFile)
-        val encrypt = encrypt(bytes)
+        val encrypted = encrypt(bytes)
         val fos = FileOutputStream(File(unzipDir, "secret-${dexFile.name}"))
-        fos.write(encrypt)
+        fos.write(encrypted)
         fos.flush()
         fos.close()
         dexFile.delete()
@@ -91,11 +91,9 @@ fun alignUnsignedApk(unsignedApkPath: String, alignedUnsignedApkPath: String) {
  */
 
 fun signApk(signedApkPath: String, keyStorePath: String, alignedUnsignedApkPath: String) {
-    val signedApkFile = File(signedApkPath)
-    val jksFile = File(keyStorePath)
     val process =
         Runtime.getRuntime()
-            .exec("apksigner sign --ks $keyStorePath --out $signedApkFile $alignedUnsignedApkPath")
+            .exec("apksigner sign --ks $keyStorePath --out $signedApkPath $alignedUnsignedApkPath")
     if (process.exitValue() != 0) {
         throw RuntimeException("apksigner failed")
     }
@@ -104,18 +102,18 @@ fun signApk(signedApkPath: String, keyStorePath: String, alignedUnsignedApkPath:
 /**
  * Reference: {@link https://blog.csdn.net/I123456789T/article/details/91819275}
  */
-fun main() {
-    val aarFilePath = "apk-reinforcer/build/outputs/aar/apk-reinforcer-debug.aar"
-    val aarUnzipDir = "apk-reinforcer/aar-unzip"
-    buildDexFromAar(aarFilePath, aarUnzipDir)
-    val srcApkPath = "app/build/outputs/apk/debug/app-debug.apk"
-    val srcUnzipPath = "app/build/outputs/apk/debug/src-apk-unzip"
-    encryptDex(srcApkPath, srcUnzipPath)
-    val unsignedApkPath = "app/build/outputs/apk/debug/app-unsigned.apk"
-    rebuildDexIntoApk(srcUnzipPath, unsignedApkPath)
-    val alignedUnsignedApkPath = "app/build/outputs/apk/debug/app-unsigned-aligned.apk"
-    alignUnsignedApk(unsignedApkPath, alignedUnsignedApkPath)
-    val signedApkPath = "app/build/outputs/apk/debug/app-signed-aligned.apk"
-    val keyStorePath = "app/app.jks"//use your file
-    signApk(alignedUnsignedApkPath, keyStorePath, alignedUnsignedApkPath)
-}
+//fun main() {
+//    val aarFilePath = "apk-reinforcer/build/outputs/aar/apk-reinforcer-debug.aar"
+//    val aarUnzipDir = "apk-reinforcer/aar-unzip"
+//    buildDexFromAar(aarFilePath, aarUnzipDir)
+//    val srcApkPath = "app/build/outputs/apk/debug/app-debug.apk"
+//    val srcUnzipPath = "app/build/outputs/apk/debug/src-apk-unzip"
+//    encryptDex(srcApkPath, srcUnzipPath)
+//    val unsignedApkPath = "app/build/outputs/apk/debug/app-unsigned.apk"
+//    rebuildDexIntoApk(srcUnzipPath, unsignedApkPath)
+//    val alignedUnsignedApkPath = "app/build/outputs/apk/debug/app-unsigned-aligned.apk"
+//    alignUnsignedApk(unsignedApkPath, alignedUnsignedApkPath)
+//    val signedApkPath = "app/build/outputs/apk/debug/app-signed-aligned.apk"
+//    val keyStorePath = "app/app.jks"//use your file
+//    signApk(alignedUnsignedApkPath, keyStorePath, alignedUnsignedApkPath)
+//}
